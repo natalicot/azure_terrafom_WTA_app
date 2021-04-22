@@ -1,0 +1,40 @@
+pipeline {
+    agent {label 'azure_slave'}
+    triggers {
+        gitlab(
+            triggerOnPush: true)
+    }
+    stages {
+        stage('build artifact') {
+            steps{
+                sh "ls"
+                sh "zip -r ./WTA_artifact_lts.zip ."
+                sh "zip -r ./WTA_artifact_${env.BUILD_ID}.zip ."
+                sh "ls"
+            }
+        }
+        stage('deploy artifact') {
+            environment {
+                ARTIFACTORY_CREDS = credentials('artifactory')
+            }
+            steps{
+                sh "ls"
+                sh "curl -$ARTIFACTORY_CREDS_USR:$ARTIFACTORY_CREDS_PSW -T ./WTA_artifact_lts.zip 'http://10.0.4.4:8082/artifactory/WTA_artifact/WTA_artifact_lts.zip'"
+                sh "curl -$ARTIFACTORY_CREDS_USR:$ARTIFACTORY_CREDS_PSW -T ./WTA_artifact_${env.BUILD_ID}.zip 'http://10.0.4.4:8082/artifactory/WTA_artifact/WTA_artifact_${env.BUILD_ID}.zip'"
+                sh "ls"
+            }
+        }
+    }
+    post { 
+        always { 
+            sh "rm -rf WTA_artifact_lts.zip"
+            sh "rm -rf WTA_artifact_${env.BUILD_ID}.zip"
+        }
+        failure {
+            sh 'echo "I failed :("'
+        }
+        success {
+            build job: 'WTA_CD/master', propagate: true, wait: true
+        }
+    }
+}

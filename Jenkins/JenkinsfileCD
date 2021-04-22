@@ -1,0 +1,29 @@
+pipeline {
+    agent {label 'azure_app'}
+    stages {
+        stage('stop app') {
+            steps{
+                sh "ls"
+                sh "pm2 stop all || true"
+                sh "rm -rf /home/azureuser/work/workspace/WTA_CD_master/*"
+            }
+        }
+        stage('retriev artifact') {
+            environment {
+                ARTIFACTORY_CREDS = credentials('artifactory')
+            }
+            steps{
+                sh "ls"
+                sh "curl -$ARTIFACTORY_CREDS_USR:$ARTIFACTORY_CREDS_PSW -O 'http://10.0.4.4:8082/artifactory/WTA_artifact/WTA_artifact_lts.zip'"
+                sh "echo 'yes' | unzip WTA_artifact_lts.zip || true"
+            }
+        }
+        stage('start app') {
+            steps{
+                sh "npm install"
+                sh "npm run initdb"
+                sh "pm2 start src/index.js"
+            }
+        }
+    }
+}

@@ -47,3 +47,7 @@ when starting artifactory the initial password is: password and username: admin.
 ![](images/artifactory.png)
 
 ## If you would like to make a change to the app push the new commit to the master branch and the pipelines will do the rest :)
+
+Two Beautiful blue circles : 
+![](images/CDBlue.png)
+![](images/CI_Blue.png)
