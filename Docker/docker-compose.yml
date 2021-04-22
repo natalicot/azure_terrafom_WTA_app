@@ -1,0 +1,42 @@
+version: '2.0'
+
+
+services:
+  
+  jenkins:
+    image: jenkins
+    volumes:
+      - "jenkins_home1:/var/jenkins_home"
+      - "/var/run/docker.sock:/var/run/docker.sock"
+    ports:
+      - "8080:8080"
+      - "50000:50000"
+
+  gitlab:
+    image: gitlab/gitlab-ce
+    volumes:
+      - "gitlab_conf:/etc/gitlab"
+      - "gitlab_data:/var/opt/gitlab"
+    ports:
+      - "8081:80"
+
+  artifactory:
+    image: docker.bintray.io/jfrog/artifactory-oss:latest
+    ports:
+      - "8082:8082"
+      - "8087:8081"
+    volumes:
+      - "artifactory_conf:/var/opt/jfrog/artifactory"
+
+
+
+
+volumes: 
+  jenkins_home1:
+    external: false
+  gitlab_data:
+    external: false
+  gitlab_conf:
+    external: false
+  artifactory_conf:
+    external: false
